@@ -1,0 +1,37 @@
+## DYNAMIC CONFIGURATION
+
+http:
+
+  middlewares:
+    # Basic Auth (#1)
+    auth:
+      basicAuth:
+        users:
+          - "admin:$apr1$nQMR9nlW$9DnZWvoWIcvKh6VOcSUnP1"
+
+    # HTTPS Extras (#2)
+    secureHeaders:
+      headers:
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 31536000
+
+  # Dashboard configuration + Basic Auth
+  routers:
+    dashboard:
+      rule: Host(`traefik.local`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
+      service: api@internal
+      middlewares:
+        - auth
+        - secureHeaders@file # Security
+      tls:
+        certresolver:
+          - lets-encrypt # overridden by custom SSL certificates
+
+
+# Custom SSL Certificates for specific domains (#2)
+tls:
+  certificates:
+    - certFile: /certs/traefik.local.cert
+      keyFile: /certs/traefik.local.key
