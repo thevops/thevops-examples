@@ -1,0 +1,25 @@
+# simplest example, HTTP
+
+version: "3.8"
+
+services:
+
+  # Application
+  pkad:
+    image: poznajkubernetes/pkad
+    expose:
+      - 8080
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pkad.entrypoints=web"
+      - "traefik.http.routers.pkad.rule=Host(`pkad.192.168.64.3.nip.io`)"
+
+  # Reverse proxy
+  traefik:
+    image: traefik:v2.5
+    ports:
+      - 80:80 # HTTP
+      - 8080:8080 # Web GUI
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik_static.yml:/traefik.yml:ro # Traefik static configuration

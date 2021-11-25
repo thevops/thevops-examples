@@ -1,0 +1,24 @@
+## DYNAMIC CONFIGURATION
+
+http:
+
+  middlewares:
+    # Basic Auth
+    auth:
+      basicAuth:
+        users:
+          - "admin:$apr1$nQMR9nlW$9DnZWvoWIcvKh6VOcSUnP1" # admin:admin123
+
+  # Dashboard configuration + Basic Auth
+  routers:
+    dashboard:
+      rule: Host(`traefik.192.168.64.3.nip.io`) && (PathPrefix(`/api`) || PathPrefix(`/`))
+      entrypoints:
+        - web
+        - websecure
+      service: api@internal
+      middlewares:
+        - auth@file
+      tls:
+        certresolver:
+          - lets-encrypt

@@ -1,0 +1,28 @@
+# simplest example, HTTPS + TLS/SSL
+
+version: "3.8"
+
+services:
+
+  # Application
+  pkad:
+    image: poznajkubernetes/pkad
+    expose:
+      - 8080
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pkad.entrypoints=web,websecure" # HTTPS (#2)
+      - "traefik.http.routers.pkad.rule=Host(`pkad.192.168.64.3.nip.io`)"
+      - "traefik.http.routers.pkad.tls.certresolver=lets-encrypt" # HTTPS (#2)
+
+  # Reverse proxy
+  traefik:
+    image: traefik:v2.5
+    ports:
+      - 80:80 # HTTP
+      - 443:443 # HTTPS (#2)
+      - 8080:8080 # Web GUI
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik_static.yml:/traefik.yml:ro # Traefik static configuration
+      - ./acme.json:/acme.json # HTTPS (#2) first: touch acme.json && chmod 600 acme.json

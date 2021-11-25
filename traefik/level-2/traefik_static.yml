@@ -1,0 +1,43 @@
+## STATIC CONFIGURATION
+log:
+  level: INFO
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+
+api:
+  insecure: true
+  dashboard: true
+
+entryPoints:
+  web:
+    address: ":80"
+
+    # HTTPS redirect (#2)
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+    # ---
+
+  # HTTPS (#2)
+  websecure:
+    address: ":443"
+  # ---
+
+
+
+# HTTPS (#2)
+certificatesResolvers:
+  lets-encrypt:
+    acme:
+      caServer: https://acme-staging-v02.api.letsencrypt.org/directory # unlimited, but not signed certificate for testing
+      storage: acme.json
+      email: email@test.com # CHANGE_ME
+      httpChallenge:
+        entryPoint: web
+# ---
